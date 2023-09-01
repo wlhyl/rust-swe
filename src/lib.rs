@@ -1,8 +1,14 @@
 mod exp;
+mod house;
 mod raw;
+mod sweph;
+mod swephlib;
 
 pub use crate::exp::Calendar;
-pub use exp::{Flag, Planet};
+pub use exp::{Body, Flag, HouseSystem};
+pub use house::swe_houses;
+pub use sweph::swe_calc_ut;
+pub use swephlib::{swe_cotrans, swe_degnorm};
 
 use std::{ffi::CString, os::raw::c_char};
 
@@ -41,25 +47,10 @@ pub fn swe_date_conversion(
     };
     let mut tjd = 0.0;
     let error = unsafe { raw::swe_date_conversion(y, m, d, hour, c, &mut tjd) };
-    if error != 0 {
-        Err(())
-    } else {
+    if error == 0 {
         Ok(tjd)
-    }
-}
-
-pub fn swe_calc_ut(tjd_ut: f64, ipl: Planet, iflag: &[Flag]) -> Result<[f64; 6], String> {
-    let xx = [0.0; 6];
-    let serr = [0; 255];
-    let iflag = iflag.iter().fold(0, |acc, x| acc | i32::from(x));
-    let iflgret =
-        unsafe { raw::swe_calc_ut(tjd_ut, ipl.into(), iflag.into(), xx.as_ptr(), serr.as_ptr()) };
-    let serr = unsafe { std::ffi::CStr::from_ptr(serr.as_ptr()) };
-    let serr = serr.to_str().unwrap().to_string();
-    if iflgret < 0 || !serr.is_empty() {
-        Err(serr)
     } else {
-        Ok(xx)
+        Err(())
     }
 }
 
@@ -121,8 +112,40 @@ pub fn swe_utc_time_zone(
     )
 }
 
-pub fn swe_degnorm(x: f64) -> f64 {
-    unsafe { raw::swe_degnorm(x) }
+pub fn swe_utc_to_jd(
+    iyear: i32,
+    imonth: i32,
+    iday: i32,
+    ihour: i32,
+    imin: i32,
+    dsec: f64,
+    gregflag: Calendar,
+) -> Result<[f64; 2], String> {
+    let dret = [0.0; 2];
+
+    let serr = [0; 255];
+
+    let error = unsafe {
+        raw::swe_utc_to_jd(
+            iyear,
+            imonth,
+            iday,
+            ihour,
+            imin,
+            dsec,
+            gregflag.into(),
+            dret.as_ptr(),
+            serr.as_ptr(),
+        )
+    };
+
+    if error == 0 {
+        Ok(dret)
+    } else {
+        let serr = unsafe { std::ffi::CStr::from_ptr(serr.as_ptr()) };
+        let serr = serr.to_str().unwrap().to_string();
+        Err(serr)
+    }
 }
 
 #[cfg(test)]

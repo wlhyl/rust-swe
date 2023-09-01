@@ -1,4 +1,5 @@
 use std::os::raw::{c_char, c_double, c_int};
+
 #[link(name = "swe")]
 extern "C" {
     pub(crate) fn swe_version(s_version: *const c_char) -> *const c_char;
@@ -13,13 +14,7 @@ extern "C" {
         tjd: *const c_double,
     ) -> c_int;
 
-    pub(crate) fn swe_calc_ut(
-        tjd_ut: c_double,
-        ipl: c_int,
-        iflag: c_int,
-        xx: *const c_double,
-        serr: *const c_char,
-    ) -> c_int;
+
 
     pub fn swe_julday(
         year: c_int,
@@ -61,6 +56,33 @@ extern "C" {
         dsec_out: *const c_double,
     );
 
-    pub fn swe_degnorm(x: c_double) -> c_double;
+    pub fn swe_utc_to_jd(
+        iyear: c_int,
+        imonth: c_int,
+        iday: c_int,
+        ihour: c_int,
+        imin: c_int,
+        dsec: c_double,  /* NOTE: second is a decimal */
+        gregflag: c_int, /* Gregorian calendar: 1, Julian calendar: 0 */
+        dret: *const c_double, /* return array, two doubles:
+                          * dret[0] = Julian day in ET (TT)
+                          * dret[1] = Julian day in UT (UT1) */
+        serr: *const c_char, /* error string */
+    ) -> c_int;
+
+    
+
+    pub fn swe_houses(
+        tjd_ut: c_double, /* Julian day number, UT */
+        geolat: c_double, /* geographic latitude, in degrees */
+        geolon: c_double, /* geographic longitude, in degrees
+                           * eastern longitude is positive,
+                           * western longitude is negative,
+                           * northern latitude is positive,
+                           * southern latitude is negative */
+        hsys: c_int, /* house method, ascii code of one of the letters documented below */
+        cusps: *const c_double, /* array for 13 (or 37 for system G) doubles, explained further below */
+        ascmc: *const c_double, /* array for 10 doubles, explained further below */
+    ) -> c_int;
 
 }

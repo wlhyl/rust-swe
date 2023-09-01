@@ -1,0 +1,36 @@
+use crate::{Body, Flag};
+
+mod raw {
+    use std::os::raw::{c_char, c_double, c_int};
+    #[link(name = "swe")]
+    extern "C" {
+        // tjd_ut   = Julian day, Universal Time
+        // ipl      = body number
+        // iflag    = a 32 bit integer containing bit flags that indicate what kind of computation is wanted
+        // xx       = array of 6 doubles for longitude, latitude, distance, speed in long., speed in lat., and speed in dist.
+        // serr[256] = character string to return error messages in case of error.
+         pub(crate) fn swe_calc_ut(
+            tjd_ut: c_double,
+            ipl: c_int,
+            iflag: c_int,
+            xx: *const c_double,
+            serr: *const c_char,
+        ) -> c_int;
+
+    }
+}
+
+pub fn swe_calc_ut(tjd_ut: f64, ipl: &Body, iflag: &[Flag]) -> Result<[f64; 6], String> {
+    let xx = [0.0; 6];
+    let serr = [0; 255];
+    let iflag = iflag.iter().fold(0, |acc, x| acc | i32::from(x));
+    let iflgret =
+        unsafe { raw::swe_calc_ut(tjd_ut, ipl.into(), iflag.into(), xx.as_ptr(), serr.as_ptr()) };
+    let serr = unsafe { std::ffi::CStr::from_ptr(serr.as_ptr()) };
+    let serr = serr.to_str().unwrap().to_string();
+    if iflgret < 0 || !serr.is_empty() {
+        Err(serr)
+    } else {
+        Ok(xx)
+    }
+}

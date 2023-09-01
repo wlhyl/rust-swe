@@ -8,7 +8,10 @@
 * swe_julday
 * swe_revjul
 * swe_utc_time_zone
+* swe_utc_to_jd
 * swe_degnorm
+* swe_houses
+* swe_cotrans
 
 # 安装
 * 安装swe

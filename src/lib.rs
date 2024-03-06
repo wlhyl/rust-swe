@@ -7,7 +7,7 @@ mod swephlib;
 pub use crate::exp::Calendar;
 pub use exp::{Body, Flag, HouseSystem};
 pub use house::swe_houses;
-pub use sweph::swe_calc_ut;
+pub use sweph::{swe_calc_ut, swe_fixstar2_ut};
 pub use swephlib::{swe_cotrans, swe_degnorm};
 
 use std::{ffi::CString, os::raw::c_char};

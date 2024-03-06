@@ -12,17 +12,17 @@
 * swe_degnorm
 * swe_houses
 * swe_cotrans
+* swe_fixstar2_ut
 
 # 安装
 * 安装swe
 ```
 mkdir /tmp/swe
 cd /tmp/swe
-wget https://www.astro.com/ftp/swisseph/swe_unix_src_2.10.03.tar.gz
-tar xvzf swe_unix_src_2.10.03.tar.gz
-cd swe
-make libswe.so
-cp libswe.so /usr/local/lib/
+wget https://github.com/aloistr/swisseph/archive/refs/tags/v2.10.03.tar.gz -O swe.tar.gz
+tar xvzf swe.tar.gz
+cd swisseph-2.10.03
+make libswe.a
 ```
 * 在rust项目中添加以下依赖
 ```
